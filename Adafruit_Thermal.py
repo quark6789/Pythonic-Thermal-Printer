@@ -36,9 +36,14 @@ from serial import Serial
 import time
 import sys
 import math
+from warnings import warn
+
+
+MIN_LINE_HEIGHT = 24
+DEFAULT_LINE_HEIGHT = 32
+
 
 class Adafruit_Thermal(Serial):
-
 	resumeTime      =   0.0
 	byteTime        =   0.0
 	dotPrintTime    =   0.0
@@ -445,6 +450,8 @@ class Adafruit_Thermal(Serial):
 		elif c == 'R':
 			pos = 2
 		else:
+			if c != 'L':
+				warn(f"Invalid justification '{c}'. Using left.")
 			pos = 0
 		self.writeBytes(0x1B, 0x61, pos)
 
@@ -484,6 +491,8 @@ class Adafruit_Thermal(Serial):
 			self.charHeight = 48
 			self.maxColumn  = 32
 		else:          # Small: standard width and height
+			if c != 'S':
+				warn(f"Invalid size '{c}'. Using small.")
 			size            = 0x00
 			self.charHeight = 24
 			self.maxColumn  = 32
@@ -627,9 +636,12 @@ class Adafruit_Thermal(Serial):
 		# If set, we have paper; if clear, no paper
 		return stat == 0
 
-	def setLineHeight(self, val=32):
-		if val < 24: val = 24
-		self.lineSpacing = val - 24
+	def setLineHeight(self, val=DEFAULT_LINE_HEIGHT):
+		if val < MIN_LINE_HEIGHT:
+			val = MIN_LINE_HEIGHT
+			warn(f"Requested line height less than minimum "
+			     f"({MIN_LINE_HEIGHT}). Using {val}.")
+		self.lineSpacing = val - MIN_LINE_HEIGHT
 
 		# The printer doesn't take into account the current text
 		# height when setting line height, making this more akin
@@ -732,3 +744,35 @@ class Adafruit_Thermal(Serial):
 			self.write((str(arg)).encode('cp437', 'ignore'))
 		self.write('\n'.encode('cp437', 'ignore'))
 
+	def format(self,
+			   size: str = 'S',
+			   justify: str = 'L',
+			   lineHeight: int = DEFAULT_LINE_HEIGHT,
+			   inverse: bool = False,
+			   upsideDown: bool = False,
+			   doubleHeight: bool = False,
+			   doubleWidth: bool = False,
+			   strike: bool = False,
+			   bold: bool = False,
+			   underline: bool = False,
+	):
+		self.setDefault()
+		self.setSize(size)
+		self.justify(justify)
+		self.setLineHeight(lineHeight)
+		if inverse:
+			self.inverseOn()
+		if upsideDown:
+			self.upsideDownOn()
+		if doubleHeight:
+			self.doubleHeightOn()
+		if doubleWidth:
+			self.doubleWidthOn()
+		if strike:
+			self.strikeOn()
+		if bold:
+			self.boldOn()
+		if underline:
+			self.underlineOn()
+		yield
+		self.setDefault()
