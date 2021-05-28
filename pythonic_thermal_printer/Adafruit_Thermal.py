@@ -36,11 +36,14 @@ from serial import Serial
 import time
 import sys
 import math
+from contextlib import contextmanager
 from warnings import warn
 
 
 MIN_LINE_HEIGHT = 24
 DEFAULT_LINE_HEIGHT = 32
+
+MAX_CHARS_PER_LINE = 32
 
 
 class Adafruit_Thermal(Serial):
@@ -744,6 +747,7 @@ class Adafruit_Thermal(Serial):
 			self.write((str(arg)).encode('cp437', 'ignore'))
 		self.write('\n'.encode('cp437', 'ignore'))
 
+	@contextmanager
 	def format(self,
 			   size: str = 'S',
 			   justify: str = 'L',
