@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pytz = "2021.1"
+requests = "2.25.1"
+pyserial = "==3.5"
+wiringpi = "==2.60.1"
+pillow = "==8.2.0"
+unidecode = "==1.2.0"
+
+[dev-packages]
+
+[requires]
+python_version = "3.7"
